@@ -1,3 +1,4 @@
+import { storeIdentity, verifyIdentity } from './p2pVerification.js';
 const express = require("express")
 const { SerialPort } = require("serialport")
 const { ReadlineParser } = require("@serialport/parser-readline")
@@ -7,7 +8,7 @@ const app = express()
 app.use(cors())
 const port1 = 4000
 
-console.log(`server running on port http://localhost:4000`)
+console.log(server running on port http://localhost:4000)
 
 const port = new SerialPort({
 	path: "COM5", //change this to the port your arduino is connected to
@@ -94,7 +95,22 @@ async function reciveData() {
 		}
 	})
 }
-
+app.post('/register', async (req, res) => {
+	const { userId, encryptedIdentity } = req.body;
+	await storeIdentity(userId, encryptedIdentity);
+	res.send({ message: 'Identity stored successfully' });
+  });
+  
+  // Verify Identity
+  app.post('/verify', async (req, res) => {
+	const { userId } = req.body;
+	const identity = await verifyIdentity(userId);
+	if (identity) {
+	  res.send({ verified: true, data: identity });
+	} else {
+	  res.status(404).send({ verified: false, message: 'Identity not found' });
+	}
+  });
 app.listen(port1, () => {
-	console.log(`Server is running on port ${port1}`)
+	console.log(Server is running on port ${port1})
 })
